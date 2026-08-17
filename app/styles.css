@@ -1,11 +1,52 @@
-:root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; background: #07111f; color: #edf5ff; }
+:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #071019; color: #f4f7f9; }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 80% 10%, #153b66 0, transparent 32rem), #07111f; }
-main { width: min(760px, calc(100% - 40px)); margin: 0 auto; padding: 15vh 0 80px; }
-.eyebrow { color: #68d5ff; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: .75rem; }
-h1 { margin: .4rem 0 1.5rem; font-size: clamp(2.8rem, 8vw, 5.8rem); line-height: .94; letter-spacing: -.055em; }
-.lead { max-width: 640px; color: #aec2d8; font-size: 1.25rem; line-height: 1.6; }
-section { margin: 3.5rem 0 2rem; padding: 1.5rem; border: 1px solid #284765; border-radius: 16px; background: #0c1b2acc; }
-h2 { margin-top: 0; font-size: 1rem; }
-code { overflow-wrap: anywhere; color: #92e8c4; }
-.note { color: #7f96ac; font-size: .9rem; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 75% 5%, #12374a 0, transparent 28rem), #071019; }
+a { color: inherit; text-decoration: none; }
+main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+nav { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #20303d; }
+.wordmark { display: flex; gap: 10px; align-items: center; font-weight: 750; letter-spacing: -.02em; }
+.wordmark span { color: #69e4bb; font-size: 1.6rem; }
+.navLinks { display: flex; gap: 28px; color: #a9bac6; font-size: .9rem; }
+.navLinks a:hover, footer a:hover { color: #69e4bb; }
+.hero { padding: 100px 0 86px; max-width: 940px; }
+.status { display: inline-flex; align-items: center; gap: 9px; padding: 7px 11px; border: 1px solid #2a4e4b; border-radius: 999px; background: #0c2525; color: #9ce7d0; font-size: .76rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+.status span { width: 7px; height: 7px; border-radius: 50%; background: #69e4bb; box-shadow: 0 0 12px #69e4bb; }
+h1 { margin: 28px 0 24px; font-size: clamp(3.4rem, 8vw, 7.3rem); line-height: .92; letter-spacing: -.065em; }
+h1 em { color: #69e4bb; font-style: normal; }
+.lead { max-width: 750px; color: #a9bac6; font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.6; }
+.feedForm { margin-top: 42px; padding: 12px; border: 1px solid #2a3f4d; border-radius: 18px; background: #0c1923d9; box-shadow: 0 22px 70px #0006; }
+.feedForm label { display: block; padding: 5px 7px 11px; color: #c7d2da; font-size: .82rem; font-weight: 650; }
+.inputRow { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+input { min-width: 0; padding: 17px 18px; border: 1px solid #2b4352; border-radius: 10px; outline: none; background: #071019; color: #fff; font: inherit; }
+input:focus { border-color: #69e4bb; box-shadow: 0 0 0 3px #69e4bb22; }
+button, .button { border: 0; border-radius: 10px; padding: 16px 20px; font: inherit; font-weight: 720; cursor: pointer; }
+.inputRow button, .primary { background: #69e4bb; color: #071019; }
+.inputRow button:hover, .primary:hover { background: #86efd0; }
+.formMeta { min-height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 8px 7px 0; color: #7f94a3; font-size: .76rem; }
+.formMeta p { margin: 0; }
+.formError { color: #ff9d9d; }
+.debugButton { padding: 3px 0; background: transparent; color: #8ecab8; font-size: .76rem; }
+.debugButton:hover { color: #69e4bb; }
+.privacy { margin: 15px 0 0; color: #728694; font-size: .78rem; }
+.workflow { padding: 62px 0; border-top: 1px solid #20303d; border-bottom: 1px solid #20303d; }
+.sectionLabel { margin: 0 0 25px; color: #69e4bb; font-size: .72rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+.flow { display: flex; flex-wrap: wrap; gap: 13px; align-items: center; }
+.flow span { padding: 13px 16px; border: 1px solid #293e4c; border-radius: 8px; color: #9aadb9; font-size: .85rem; }
+.flow span.active { border-color: #3c8c75; background: #0e2a26; color: #9ce7d0; }
+.flow b { color: #456070; }
+.features { display: grid; grid-template-columns: repeat(4, 1fr); padding: 76px 0; border-bottom: 1px solid #20303d; }
+.features article { min-height: 210px; padding: 0 28px; border-left: 1px solid #20303d; }
+.features article:first-child { padding-left: 0; border: 0; }
+.features article > span { color: #527083; font: 700 .72rem ui-monospace, monospace; }
+.features h2 { margin: 38px 0 12px; font-size: 1.08rem; }
+.features p, .openSource p { margin: 0; color: #8399a7; font-size: .9rem; line-height: 1.65; }
+.openSource { display: flex; justify-content: space-between; gap: 50px; align-items: flex-end; padding: 90px 0; }
+.openSource h2 { margin: 0 0 20px; font-size: clamp(2.1rem, 5vw, 4rem); line-height: 1; letter-spacing: -.045em; }
+.openSource p:not(.sectionLabel) { max-width: 480px; }
+.actions { display: flex; gap: 10px; flex-shrink: 0; }
+.secondary { border: 1px solid #314958; background: transparent; color: #dce5ea; }
+.secondary:hover { border-color: #69e4bb; }
+footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px 0 45px; border-top: 1px solid #20303d; color: #6f8492; font-size: .78rem; }
+@media (max-width: 800px) { .hero { padding-top: 70px; } .features { grid-template-columns: 1fr 1fr; gap: 45px 0; } .features article:nth-child(3) { padding-left: 0; border: 0; } .openSource { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 560px) { main { width: min(100% - 28px, 1180px); } nav { height: 64px; } .navLinks a:first-child { display: none; } .hero { padding: 58px 0 65px; } h1 { font-size: clamp(3rem, 15vw, 5rem); } .inputRow { grid-template-columns: 1fr; } .formMeta { align-items: flex-start; gap: 8px; } .features { grid-template-columns: 1fr; } .features article, .features article:nth-child(3) { min-height: auto; padding: 0 0 35px; border: 0; } .features h2 { margin-top: 18px; } .actions { width: 100%; flex-direction: column; } .button { text-align: center; } footer { flex-direction: column; } }
