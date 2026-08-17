@@ -24,6 +24,22 @@ function simplify(html: string): string {
   return sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} }).replace(/\s+/g, " ").trim().slice(0, 500);
 }
 
+function imageType(url: string, declaredType: string): string {
+  try {
+    const parsed = new URL(url);
+    const extension = parsed.pathname.toLowerCase().match(/\.(avif|gif|jpe?g|png|webp)$/)?.[1];
+    if (extension) return `image/${extension === "jpg" ? "jpeg" : extension}`;
+    // linkedinrss.cns.me currently serves its extensionless image proxy as PNG.
+    if (parsed.hostname === "linkedinrss.cns.me" && parsed.pathname.startsWith("/img/")) return "image/png";
+  } catch { /* Keep a valid declared fallback for malformed enclosure URLs. */ }
+  return declaredType.startsWith("image/") ? declaredType : "image/jpeg";
+}
+
+function containsImage(html: string, url: string): boolean {
+  const encoded = esc(url);
+  return html.includes(`src="${encoded}"`) || html.includes(`src='${encoded}'`);
+}
+
 export function normalizeFeed(sourceXml: string, selfUrl?: string): Normalized {
   if (/<!DOCTYPE|<!ENTITY/i.test(sourceXml)) throw new Error("DOCTYPE and ENTITY declarations are not allowed");
   const parsed = parser.parse(sourceXml) as Record<string, any>;
@@ -44,17 +60,23 @@ export function normalizeFeed(sourceXml: string, selfUrl?: string): Normalized {
     });
     const enclosure = first(item.enclosure as Record<string, unknown> | Record<string, unknown>[] | undefined);
     const enclosureUrl = enclosure ? text(enclosure["@_url"] as XmlValue) : "";
+    const declaredType = text(enclosure?.["@_type"] as XmlValue) || "image/jpeg";
+    const enclosureType = enclosureUrl ? imageType(enclosureUrl, declaredType) : "";
+    const coverHtml = enclosureUrl && !containsImage(html, enclosureUrl)
+      ? `<figure><img src="${esc(enclosureUrl)}" alt="${esc(title || "Article cover")}" loading="lazy"></figure>`
+      : "";
+    const fullHtml = `${coverHtml}${html}`;
     const inlineImages = (html.match(/<img\b/gi) ?? []).length;
     imagesFound += inlineImages + (enclosureUrl ? 1 : 0);
     const author = repairMojibake(text(item.author || item["dc:creator"]));
     const pubDate = validDate(text(item.pubDate).trim());
-    const enclosureXml = enclosureUrl ? `<enclosure url="${esc(enclosureUrl)}" type="${esc(text(enclosure?.["@_type"] as XmlValue) || "image/jpeg")}"/>` : "";
-    return `<item>${tag("title", title)}${tag("link", link)}${link ? `<guid isPermaLink="true">${esc(link)}</guid>` : tag("guid", text(item.guid))}${pubDate ? tag("pubDate", pubDate) : ""}${author ? tag("author", author) : ""}<description><![CDATA[${cdata(simplify(html))}]]></description><content:encoded><![CDATA[${cdata(html)}]]></content:encoded>${enclosureXml}</item>`;
+    const enclosureXml = enclosureUrl ? `<enclosure url="${esc(enclosureUrl)}" type="${esc(enclosureType)}"/><media:content url="${esc(enclosureUrl)}" type="${esc(enclosureType)}" medium="image"/><media:thumbnail url="${esc(enclosureUrl)}"/>` : "";
+    return `<item>${tag("title", title)}${tag("link", link)}${link ? `<guid isPermaLink="true">${esc(link)}</guid>` : tag("guid", text(item.guid))}${pubDate ? tag("pubDate", pubDate) : ""}${author ? tag("author", author) : ""}<description><![CDATA[${cdata(simplify(fullHtml))}]]></description><content:encoded><![CDATA[${cdata(fullHtml)}]]></content:encoded>${enclosureXml}</item>`;
   });
   const title = repairMojibake(text(channel.title));
   const description = repairMojibake(text(channel.description));
   const link = repairMojibake(text(channel.link));
   const atom = selfUrl ? `<atom:link href="${esc(selfUrl)}" rel="self" type="application/rss+xml"/>` : "";
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>${tag("title", title)}${tag("link", link)}${tag("description", description)}${atom}${items.join("")}</channel></rss>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/"><channel>${tag("title", title)}${tag("link", link)}${tag("description", description)}${atom}${items.join("")}</channel></rss>`;
   return { xml, diagnostic: { feedDetected: true, itemsFound: items.length, encodingIssuesDetected: sourceHadIssues, contentEncodedGenerated: items.length > 0, imagesFound, warnings: rawItems.length ? [] : ["Feed has no items"] } };
 }

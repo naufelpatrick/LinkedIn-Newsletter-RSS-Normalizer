@@ -7,12 +7,24 @@ describe("normalizeFeed", () => {
   it("generates importer-friendly RSS and keeps safe rich HTML", () => {
     const result = normalizeFeed(feed);
     expect(result.xml).toContain("<title>Ação</title>");
-    expect(result.xml).toContain("<content:encoded><![CDATA[<h2>Olá</h2>");
+    expect(result.xml).toContain('<content:encoded><![CDATA[<figure><img src="https://example.com/cover.jpg" alt="Ação" loading="lazy"></figure><h2>Olá</h2>');
     expect(result.xml).toContain('<enclosure url="https://example.com/cover.jpg" type="image/jpeg"/>');
+    expect(result.xml).toContain('<media:content url="https://example.com/cover.jpg" type="image/jpeg" medium="image"/>');
+    expect(result.xml).toContain('<media:thumbnail url="https://example.com/cover.jpg"/>');
     expect(result.xml).not.toContain("<script>");
     expect(result.diagnostic).toMatchObject({ feedDetected: true, itemsFound: 1, encodingIssuesDetected: true, contentEncodedGenerated: true, imagesFound: 2 });
   });
   it("rejects entity declarations", () => {
     expect(() => normalizeFeed('<!DOCTYPE rss [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><rss/>')).toThrow(/DOCTYPE/);
+  });
+  it("does not duplicate a cover already present in article HTML", () => {
+    const existingCover = feed.replace('<h2>OlÃ¡</h2>', '<img src="https://example.com/cover.jpg"><h2>OlÃ¡</h2>');
+    const result = normalizeFeed(existingCover);
+    expect(result.xml.match(/src="https:\/\/example.com\/cover.jpg"/g)).toHaveLength(1);
+  });
+  it("corrects the known LinkedIn RSS image proxy MIME type", () => {
+    const proxyFeed = feed.replace("https://example.com/cover.jpg", "https://linkedinrss.cns.me/img/opaque-id");
+    const result = normalizeFeed(proxyFeed);
+    expect(result.xml).toContain('type="image/png"');
   });
 });
